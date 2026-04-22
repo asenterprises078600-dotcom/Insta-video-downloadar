@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AS Downloader Pro | Sarfaraz Siddiqui</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #000; color: #fff; }
+        .glass-box { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 40px; }
+        .vip-btn { background: linear-gradient(90deg, #FF0080, #7928CA); transition: 0.5s; box-shadow: 0 10px 20px rgba(255, 0, 128, 0.3); }
+        .vip-btn:active { transform: scale(0.95); }
+        .loader { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #fff; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6">
+
+    <header class="w-full max-w-lg mt-12 text-center">
+        <h1 class="text-4xl font-black tracking-tighter italic">INSTA<span class="text-pink-500">VIDEO</span></h1>
+        <p class="text-[10px] tracking-[0.5em] text-gray-500 font-bold uppercase mt-2">Made by Sarfaraz Siddiqui</p>
+    </header>
+
+    <div class="flex gap-4 my-10 w-full max-w-lg">
+        <div class="flex-1 bg-white/5 p-4 rounded-3xl text-center border border-white/5"><i class="fa-brands fa-instagram text-pink-500 text-xl"></i></div>
+        <div class="flex-1 bg-white/5 p-4 rounded-3xl text-center border border-white/5"><i class="fa-brands fa-youtube text-red-600 text-xl"></i></div>
+        <div class="flex-1 bg-white/5 p-4 rounded-3xl text-center border border-white/5"><i class="fa-brands fa-facebook text-blue-600 text-xl"></i></div>
+        <div class="flex-1 bg-white/5 p-4 rounded-3xl text-center border border-white/5"><i class="fa-brands fa-chrome text-green-500 text-xl"></i></div>
+    </div>
+
+    <main class="w-full max-w-lg glass-box p-8 shadow-2xl">
+        <div class="space-y-6">
+            <input type="text" id="videoUrl" placeholder="Paste link here..." 
+                class="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 focus:outline-none focus:border-pink-500 text-lg">
+
+            <button id="mainBtn" onclick="bypassDownload()" class="w-full vip-btn py-5 rounded-2xl font-black text-xl flex items-center justify-center gap-3">
+                <span id="btnText">GENERATE LINK</span>
+                <div id="loader" class="hidden loader"></div>
+            </button>
+        </div>
+
+        <div id="resultBox" class="hidden mt-10 border-t border-white/10 pt-8 animate-pulse">
+            <p class="text-center text-green-400 font-bold mb-6">VIDEO FOUND! READY TO SAVE.</p>
+            <a id="downloadLink" href="#" target="_blank" class="w-full bg-white text-black py-5 rounded-2xl font-black text-center block text-lg shadow-xl uppercase">
+                <i class="fa-solid fa-download mr-2"></i> Save to Gallery
+            </a>
+        </div>
+
+        <p id="status" class="hidden mt-6 text-center text-sm p-4 rounded-2xl bg-red-500/10 text-red-400 border border-red-500/20"></p>
+    </main>
+
+    <footer class="mt-auto py-10 opacity-30 text-[10px] font-bold tracking-widest uppercase">
+        AS Enterprises × Ellion India
+    </footer>
+
+    <script>
+        async function bypassDownload() {
+            const url = document.getElementById('videoUrl').value.trim();
+            const btn = document.getElementById('mainBtn');
+            const loader = document.getElementById('loader');
+            const status = document.getElementById('status');
+            const resultBox = document.getElementById('resultBox');
+
+            if(!url) return alert("Bhai, link toh daalo!");
+
+            status.classList.add('hidden');
+            resultBox.classList.add('hidden');
+            loader.classList.remove('hidden');
+            btn.disabled = true;
+
+            // List of APIs with Proxy Bypass
+            const engines = [
+                `https://api.vkrtool.com/api/v1/get?url=${encodeURIComponent(url)}`,
+                `https://api.socialdownloader.xyz/download?url=${encodeURIComponent(url)}`
+            ];
+
+            let found = false;
+
+            for(let api of engines) {
+                try {
+                    const res = await fetch(api);
+                    const data = await res.json();
+                    
+                    const finalUrl = data.data?.url || data.url || data.link;
+                    
+                    if(finalUrl) {
+                        document.getElementById('downloadLink').href = finalUrl;
+                        resultBox.classList.remove('hidden');
+                        found = true;
+                        break;
+                    }
+                } catch (e) {
+                    console.log("Engine failed, trying next...");
+                }
+            }
+
+            if(!found) {
+                status.innerText = "Instagram ne block kiya hai. Please Vercel par live karke try karein.";
+                status.classList.remove('hidden');
+            }
+
+            loader.classList.add('hidden');
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>
