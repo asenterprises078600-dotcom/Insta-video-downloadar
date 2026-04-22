@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaVideo Downloader | Sarfaraz Siddiqui</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #050505; color: white; }
+        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 30px; }
+        .premium-btn { background: linear-gradient(90deg, #FF0080 0%, #7928CA 100%); transition: 0.4s; }
+        .premium-btn:active { transform: scale(0.96); }
+        .platform-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); transition: 0.3s; }
+        .platform-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-3px); }
+        .spinner { border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #FF0080; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <header class="w-full max-w-lg mt-8 text-center">
+        <h1 class="text-3xl font-extrabold tracking-tighter mb-1">
+            INSTA<span class="text-pink-500">VIDEO</span> DOWNLOADER
+        </h1>
+        <p class="text-[10px] tracking-[0.4em] text-gray-500 font-bold uppercase mb-8">
+            Made by Sarfaraz Siddiqui
+        </p>
+    </header>
+
+    <div class="w-full max-w-lg grid grid-cols-4 gap-3 mb-8">
+        <div class="platform-btn flex flex-col items-center justify-center py-4 rounded-2xl">
+            <i class="fa-brands fa-instagram text-pink-500 text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">INSTA</span>
+        </div>
+        <div class="platform-btn flex flex-col items-center justify-center py-4 rounded-2xl">
+            <i class="fa-brands fa-youtube text-red-600 text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">YOUTUBE</span>
+        </div>
+        <div class="platform-btn flex flex-col items-center justify-center py-4 rounded-2xl">
+            <i class="fa-brands fa-facebook text-blue-600 text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">FACEBOOK</span>
+        </div>
+        <div class="platform-btn flex flex-col items-center justify-center py-4 rounded-2xl">
+            <i class="fa-brands fa-chrome text-green-500 text-xl mb-1"></i>
+            <span class="text-[10px] font-bold">CHROME</span>
+        </div>
+    </div>
+
+    <main class="w-full max-w-lg glass p-8 shadow-2xl relative">
+        <div class="space-y-6">
+            <div class="relative">
+                <input type="text" id="videoUrl" placeholder="Paste link here..." 
+                    class="w-full bg-white/5 border border-white/10 rounded-2xl py-5 px-6 focus:outline-none focus:border-pink-500 transition-all text-white text-sm">
+            </div>
+
+            <button id="mainBtn" onclick="universalDownload()" class="w-full premium-btn py-5 rounded-2xl font-bold text-lg shadow-lg flex items-center justify-center gap-3">
+                <span id="btnText">DOWNLOAD NOW</span>
+                <div id="loader" class="hidden spinner"></div>
+            </button>
+        </div>
+
+        <div id="resultBox" class="hidden mt-10 border-t border-white/10 pt-8 animate-fade-in">
+            <div class="rounded-2xl overflow-hidden mb-6 border border-white/10">
+                <img id="thumbImg" src="" alt="Video Thumbnail" class="w-full h-auto">
+            </div>
+            <a id="finalLink" href="#" target="_blank" class="w-full bg-white text-black py-4 rounded-xl font-extrabold text-center block shadow-lg">
+                <i class="fa-solid fa-circle-down mr-2"></i> SAVE TO GALLERY
+            </a>
+            <button onclick="shareWhatsApp()" class="w-full mt-3 bg-[#25D366]/10 border border-[#25D366]/20 text-[#25D366] py-3 rounded-xl font-bold">
+                <i class="fa-brands fa-whatsapp mr-2"></i> Share with Friends
+            </button>
+        </div>
+
+        <p id="errorMsg" class="hidden mt-6 text-red-400 text-center text-sm p-3 bg-red-400/5 rounded-xl border border-red-400/10"></p>
+    </main>
+
+    <footer class="mt-auto py-8 text-center">
+        <p class="text-gray-600 text-[10px] font-bold tracking-widest uppercase">
+            © 2026 AS Enterprises × Ellion India
+        </p>
+    </footer>
+
+    <script>
+        async function universalDownload() {
+            const url = document.getElementById('videoUrl').value.trim();
+            const btn = document.getElementById('mainBtn');
+            const btnText = document.getElementById('btnText');
+            const loader = document.getElementById('loader');
+            const resultBox = document.getElementById('resultBox');
+            const errorMsg = document.getElementById('errorMsg');
+
+            if(!url) return alert("Bhai, link daalna bhool gaye!");
+
+            // UI Reset
+            errorMsg.classList.add('hidden');
+            resultBox.classList.add('hidden');
+            loader.classList.remove('hidden');
+            btnText.innerText = "Processing...";
+            btn.disabled = true;
+
+            try {
+                // Universal API
+                const response = await fetch(`https://api.vkrtool.com/api/v1/get?url=${encodeURIComponent(url)}`);
+                const result = await response.json();
+
+                if(result.status === "success" || (result.data && result.data.url)) {
+                    document.getElementById('thumbImg').src = result.data.thumbnail || 'https://via.placeholder.com/400x200?text=Video+Ready';
+                    document.getElementById('finalLink').href = result.data.url;
+                    resultBox.classList.remove('hidden');
+                } else {
+                    throw new Error("Link not supported");
+                }
+            } catch (err) {
+                errorMsg.innerText = "Is link se video nahi nikal paya. Ek baar phir check karein.";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                loader.classList.add('hidden');
+                btnText.innerText = "DOWNLOAD NOW";
+                btn.disabled = false;
+            }
+        }
+
+        function shareWhatsApp() {
+            const url = document.getElementById('videoUrl').value;
+            window.open(`https://wa.me/?text=Ye video dekh mast hai: ${url}`, '_blank');
+        }
+    </script>
+</body>
+</html>
